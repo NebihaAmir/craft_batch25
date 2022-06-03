@@ -1,0 +1,30 @@
+	<flow name="DatabaseFlow" doc:id="7e2b09fe-8427-437a-b411-db94960535cb" >
+		<http:listener doc:name="Listener" doc:id="1bc21ff2-cf3d-4e95-8624-517c14458548" config-ref="Main-Listener" path="/insertProduct"/>
+		<db:bulk-insert doc:name="Bulk insert" doc:id="d031b566-7592-4ea5-86eb-5bcd3ad8da0f" config-ref="Database_Config">
+			<db:bulk-input-parameters ><![CDATA[#[payload map{
+	video_url: $.video_url,
+	category_id: $.category_id,
+	price: $.price,
+	description: $.description,
+	product_name: $.product_name
+}]]]></db:bulk-input-parameters>
+			<db:sql ><![CDATA[insert into tb_product (video_url,category_id,price,description,product_name) 
+values (:video_url,:category_id,:price,:description,:product_name)
+
+
+
+]]></db:sql>
+		</db:bulk-insert>
+		<set-payload value="DONE" doc:name="Set Payload" doc:id="2f2420d6-b487-4e06-a5e3-cd4c35eb0380" />
+	</flow>
+	<flow name="DatabaseFlow1" doc:id="f5021840-9a24-4833-9dfc-6fd20c9a139d" >
+		<http:listener doc:name="Listener" doc:id="6b63a849-5ec1-44d2-9282-35715b795559" config-ref="Main-Listener" path="/deletBulkProduct"/>
+		<db:bulk-delete doc:name="Bulk delete" doc:id="e42d8e4f-d233-41b6-a16a-173531fe56e4" config-ref="Database_Config">
+			<db:bulk-input-parameters ><![CDATA[#[payload map {
+	id: $.id
+}]]]></db:bulk-input-parameters>
+			<db:sql ><![CDATA[delete from tb_product where id = :id]]></db:sql>
+		</db:bulk-delete>
+		<set-payload value="Deleted" doc:name="Set Payload" doc:id="af069b54-62bd-4b33-97bb-eda9a1aa5398" />
+	</flow>
+</mule>
