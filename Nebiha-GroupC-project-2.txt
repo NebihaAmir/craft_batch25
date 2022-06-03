@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="495ec442-73c7-4440-8d23-8ec78fb03a3b" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="ccfcd4e6-92e4-48da-815b-f55911da7c18" >
+		<db:my-sql-connection host="db.icraftsoft.net" port="3306" user="mulesoftuser" password="Cr@fTMule$oFt" database="mulesoftdb" />
+	</db:config>
+	<flow name="nebiha-project-2Flow" doc:id="a1878925-1fb4-4f3a-a966-163b7bb3c2b6" >
+		<http:listener doc:name="Listener" doc:id="60842751-97d9-4959-b039-7a66dd6867f7" config-ref="HTTP_Listener_config" path="/question2"/>
+		<choice doc:name="Choice" doc:id="b4283b60-6cfa-4b6d-b537-d1ffdc1379fe" >
+			<when expression='#[attributes.queryParams.product == "products"]'>
+				<db:select doc:name="Select" doc:id="45dbfda4-6b81-4b37-bd07-52dc907f944d" config-ref="Database_Config">
+					<db:sql ><![CDATA[select * from tb_product]]></db:sql>
+				</db:select>
+			</when>
+			<when expression='#[attributes.queryParams.user == "users"]'>
+				<db:select doc:name="Select" doc:id="185290af-a67e-4c03-aa20-048c7240750f" config-ref="Database_Config">
+					<db:sql ><![CDATA[select * from users]]></db:sql>
+				</db:select>
+			</when>
+			<otherwise >
+				<set-payload value="Data is not Found!" doc:name="Set Payload" doc:id="ba396e19-6aa4-415a-8613-0bd14dc16bca" />
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="fbaeb2ec-90c4-4b61-a84d-ab0a19db78ef" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

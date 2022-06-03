@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="2f035be5-6985-4994-a335-29d064a7f0c5" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="fb133fcc-3699-4b36-87ef-1d67a02d852f" >
+		<db:my-sql-connection host="db.icraftsoft.net" port="3306" user="mulesoftuser" password="Cr@fTMule$oFt" database="mulesoftdb" />
+	</db:config>
+	<flow name="nebiha-project-3Flow" doc:id="01f7d690-f741-4d74-904d-4fa875eedb93" >
+		<http:listener doc:name="Listener" doc:id="6ebf474b-407b-46fa-af3b-c6faec032307" config-ref="HTTP_Listener_config" path="/question3">
+			<repeatable-in-memory-stream />
+		</http:listener>
+		<db:select doc:name="Select" doc:id="ff4734b4-97d4-4f12-99fc-64bff1d9cc23" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from orders]]></db:sql>
+		</db:select>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="14e6fe0a-0d7c-4e17-aa9a-84d4e03c4ba2" >
+			<route >
+				<ee:transform doc:name="Transform Message" doc:id="8a931e28-f5a5-4121-9358-0439bbab3413" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter($.amount > 5000)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<ee:transform doc:name="Transform Message" doc:id="04383b66-6a37-408f-a5d7-900bfc2b9793">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload groupBy(item)->item.status]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</route>
+			<route >
+				<ee:transform doc:name="Transform Message" doc:id="9b3837b4-d860-4daa-a627-a7fad66493f5" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter($.amount < 5000)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<ee:transform doc:name="Transform Message" doc:id="371e5911-8a5d-4751-9f25-4df12d2501a0" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload groupBy(item)->item.status]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="5fc22b60-0b2a-48c0-b9d3-486ec76412c8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+flatten(payload..payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<file:write doc:id="6209f7bd-0808-45cf-8279-fd97e0772d50" path="C:\Users\ledet\OneDrive\Documents\Nebiha-Project\groupCproject.txt" mode="APPEND"/>
+		<set-payload value="Data Grouped" doc:name="Set Payload" doc:id="73a25a13-e1b6-4111-9740-778f5a9f9430" />
+	</flow>
+</mule>

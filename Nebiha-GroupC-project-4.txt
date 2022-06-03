@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="caa22ce0-67d1-41db-a8bd-4b7df887896d" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="nebiha-project-4Flow" doc:id="54fab60e-6fc0-40c3-a0fa-f63b8eaa3a27" >
+		<http:listener doc:name="Listener" doc:id="b94b7ca5-5fde-45b8-8150-5d4286209707" config-ref="HTTP_Listener_config" path="/question4"/>
+		<choice doc:name="Choice" doc:id="2fd953d1-59b5-4083-9f2c-b7db141fa037" >
+			<when expression="#[attributes.queryParams.num &lt; 10]">
+				<choice doc:name="Choice" doc:id="faa17c4a-9e7e-4820-b93f-59da467f015b" >
+					<when expression="#[attributes.queryParams.num as Number == 1]">
+						<ee:transform doc:name="Transform Message" doc:id="1c6f2820-ca50-45d9-96c0-f43c1b6229e2" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"num is 1"]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+					</when>
+					<otherwise >
+						<ee:transform doc:name="Transform Message" doc:id="5fd27aad-ff70-476b-ad40-98741ffd5419" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"num less than 10"]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+					</otherwise>
+				</choice>
+			</when>
+			<when expression="#[attributes.queryParams.num as Number == 10]">
+				<ee:transform doc:name="Transform Message" doc:id="62f5d831-9a64-4dab-b4c6-570f90706d62" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"num is equal to 10"]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression="#[attributes.queryParams.num &gt; 10]">
+				<ee:transform doc:name="Transform Message" doc:id="0ced5411-1221-4d75-9dfb-e4964fc32e27" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"num is greater than 10"]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+		</choice>
+	</flow>
+</mule>
