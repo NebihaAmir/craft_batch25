@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="91c1d5ef-6951-49d4-baaa-0da32241bd18" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="bb031652-7339-4e06-aee4-f6df64fb9bc0" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" />
+	</db:config>
+	<flow name="question-5" doc:id="a63c39ef-0bbc-40ff-b505-aa8b3881d788" >
+		<http:listener doc:name="Listener" doc:id="b91a7349-4534-4c01-beb4-39968cc02b02" config-ref="HTTP_Listener_config" path="/bulkupdate"/>
+		<db:bulk-update doc:name="Bulk update" doc:id="63286497-733d-456d-94c0-ef574b78f65b" config-ref="Database_Config">
+			<db:bulk-input-parameters ><![CDATA[#[payload map {
+product_id: $.product_id,name: $.name, 
+description: $.description,
+video_url: $.video_url,
+price: $.price 
+	}]]]></db:bulk-input-parameters>
+			<db:sql ><![CDATA[update craftshopping.products set  name = :name, description = :description, 
+video_url = :video_url, price = :price 
+where product_id = :product_id]]></db:sql>
+		</db:bulk-update>
+		<ee:transform doc:name="Transform Message" doc:id="2208b3f3-28c2-4612-acc3-edbd719c5392" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+ payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-payload value="updated" doc:name="Set Payload" doc:id="db3ae264-52b0-4662-a377-7fecb65fa350" />
+	</flow>
+</mule>
