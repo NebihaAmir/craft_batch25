@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="4033eb12-f09d-45a4-853b-162b5999fdb6" >
+		<http:listener-connection host="0.0.0.0" port="8082" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="f929e5ab-af58-4d11-b538-a9ceed226357" >
+		<db:my-sql-connection host="db.icraftsoft.net" port="3306" user="mulesoftuser" password="Cr@fTMule$oFt" />
+	</db:config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="8712e686-320b-459b-82d2-c3e7d819b792" />
+	<flow name="use_case-question-3Flow" doc:id="486105af-4bf4-4e52-82ee-1a89d21bb422" >
+		<http:listener doc:name="Listener" doc:id="a0e382eb-c955-4852-a559-698d27c41dfa" config-ref="HTTP_Listener_config" path="/order"/>
+		<db:select doc:name="Select" doc:id="17f7031c-426e-4e54-81ca-7703ade63a03" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * FROM mulesoftdb.orders;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="03f92322-d8c4-4139-ad63-a758b0921fb1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv
+---
+(payload orderBy $.amount > 5000) ++ (payload orderBy $.amount < 5000) orderBy $.status]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<file:write doc:name="Write" doc:id="173404e1-8e49-4945-8b49-0666d9b1b48b" config-ref="File_Config" path="C:\Users\Mesee\Documents\+5000-amount.txt" mode="CREATE_NEW"/>
+		<logger level="INFO" doc:name="Logger" doc:id="8ea2d163-bf12-4e59-ae17-8e750669a6e6" message="#[payload]"/>
+	</flow>
+</mule>
